@@ -35,17 +35,16 @@
         }
         
         function handleCellClick(row, col) {
-            if (board[row][col] !== '') return;
-            board[row][col] = currentPlayer;
-            renderBoard();
-            if (isGameOver(row, col)) {
-                alert(currentPlayer + ' a gagné !');
-                resetGame();
-                return;
-            }
-            socket.emit('play', { row, col, player: currentPlayer });
-            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-        }
+        
+        socket.emit('play', { row, col });
+    }
+
+    socket.on('play', function(data) {
+        console.log("Play event received", data);
+        
+        board[data.row][data.col] = data.player;
+        renderBoard();
+    });
         
         function isGameOver(row, col) {
             const player = board[row][col];
@@ -72,9 +71,20 @@
         }
         
         socket.on('play', function(data) {
-            board[data.row][data.col] = data.player;
-            renderBoard();
-        });
+        console.log("Play event received", data);
+        
+        board[data.row][data.col] = data.player;
+        renderBoard();
+    });
+
+    socket.on('gameOver', function(data) {
+    if (data.winner === 'Draw') {
+        alert('Égalité !');
+    } else {
+        alert(`${data.winner} a gagné !`);
+    }
+    resetGame();
+});
         
         renderBoard();
     </script>
